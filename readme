@@ -1,1 +1,145 @@
+ 安装 linux虚拟机
+下载&安装 VirtualBox https://www.virtualbox.org/ 要开启 CPU 虚拟化
+3.2 安装 docker（参考docker官网）
+yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo（外网官网比较慢，用aliyun）
+    systemctl start docker(启动docker)
+    systemctl enable docker(设置开机自启动)
+    设置 Docker 镜像加速
 
+登录 aliyun.com 在控制台找到容器镜像服务
+
+docker 安装 mysql
+下载镜像文件（docker pull mysql:5.7）
+创建实例并启动
+docker run -p 3306:3306 --name mysql \
+-v /mydata/mysql/log:/var/log/mysql \
+-v /mydata/mysql/data:/var/lib/mysql \
+-v /mydata/mysql/conf:/etc/mysql \
+-e MYSQL_ROOT_PASSWORD=root \
+-d mysql:5.7
+# --name指定容器名字 -v目录挂载 -p指定端口映射  -e设置mysql参数 -d后台运行
+-v 将对应文件挂载到主机
+-e 初始化对应
+-p 容器端口映射到主机的端口
+
+docker 安装 redis
+3.4.1 下载镜像文件
+docker pull redis
+
+3.4.2 创建实例并启动
+ 
+mkdir -p /mydata/redis/conf
+touch /mydata/redis/conf/redis.conf
+
+# 启动 同时 映射到对应文件夹
+# 后面 \ 代表换行
+docker run -p 6379:6379 --name redis \
+-v /mydata/redis/data:/data \
+-v /mydata/redis/conf/redis.conf:/etc/redis/redis.conf \
+-d redis redis-server /etc/redis/redis.conf
+3.4.3 使用 redis 镜像执行 redis-cli 命令连接
+docker exec -it redis redis-cli
+
+持久化 默认 appendonly on 没有开启
+
+vim /mydata/redis/conf/redis.conf
+# 插入下面内容
+appendonly yes
+开发环境统一
+3.5.1 Maven
+配置阿里云镜像
+<mirrors>
+		<mirror>
+		<id>nexus-aliyun</id>
+		<mirrorOf>central</mirrorOf>
+		<name>Nexus aliyun</name>
+		<url>http://maven.aliyun.com/nexus/content/groups/public</url>
+		</mirror>
+	</mirrors>
+	
+配置 jdk 1.8 编译项目
+
+<profiles>
+		<profile>
+			<id>jdk-1.8</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+				<jdk>1.8</jdk>
+			</activation>
+			<properties>
+				<maven.compiler.source>1.8</maven.compiler.source>
+				<maven.compiler.target>1.8</maven.compiler.target>
+				<maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
+			</properties>
+		</profile>
+	</profiles>
+  
+  
+  3.5.4 逆向工程使用
+1、导入项目逆向工程
+
+2、下载人人开源后台管理系统脚手架工程
+
+导入工程，创建数据库
+修改工程shiro依赖为SpringSecurity
+删除部分暂时不需要的业务
+3、下载人人开源后台管理系统vue端脚手架工程
+
+vscode 导入前端项目
+前后端联调测试基本功能
+
+后端项目 renren-fast（把人人开源项目里的 renren-fast项目加入我们的gulimall项目中作为module，搭建后台管理系统的后端项目）
+
+1、在码云上搜索人人开源（https://gitee.com/renrenio），我们使用renren-fast，renren-fast-vue项目。
+
+下载到了桌面，我们把renren-fast删掉.git文件，然后移动到我们的项目文件夹，renren-vue删掉.git文件，是用VSCode打开的（后面再弄）。
+（2）IDEA项目总目录中，配置好总项目的pom.xml，
+MybatisPlus整合
+4.1 配置环境
+4.1.1、导入依赖
+<dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>3.2.0</version>
+        </dependency>
+4.2.2、配置数据源
+配置数据源
+
+导入数据库驱动
+https://mvnrepository.com/artifact/mysql/mysql-connector-java
+
+ <!--导入mysql驱动-->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.17</version>
+        </dependency>
+在application.yml配置数据源相关信息
+spring:
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://192.168.56.10:3306/gulimall_pms
+    driver-class-name: com.mysql.jdbc.Driver
+mybatis-plus:
+	# mapper文件扫描
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: auto # 数据库主键自增
+配置MyBatis-Plus包扫描：
+
+使用@MapperScanner
+
+告诉MyBatis-Plus,Sql映射文件位置
+
+@MapperScan("com.atguigu.gulimall.product.dao")
+@SpringBootApplication
+public class GulimallProductApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(GulimallProductApplication.class, args);
+    }
+}
